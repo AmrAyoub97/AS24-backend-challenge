@@ -25,7 +25,7 @@ Support Needed Reports From Provided CSV files
 * PostgreSQL Database
 
 ### Upload CSV From Postman in ```form-data``` Requet Body Format
-![alt text](https://github.com/AmrAyoub97/AS24-backend-challenge/blob/capture.png?raw=true)  
+![alt text](https://github.com/AmrAyoub97/AS24-backend-challenge/blob/master/blob/Capture.PNG?raw=true)  
 ### API Description
 | Action | Endpoint URL | Verb |
 | ------ | ------------ | ---- | 
