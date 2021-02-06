@@ -3,8 +3,8 @@ import fs from "fs";
 import * as csv from "fast-csv";
 import upload from "../middleware/upload";
 import * as path from "path";
-import ListingsInterface from "../interfaces/Listings";
-import ContactsInterface from "../interfaces/Contacts";
+import ListingsInterface from "../interfaces/listings";
+import ContactsInterface from "../interfaces/contacts";
 import * as SqlQueries from "../db/queries";
 
 const router = express.Router();
