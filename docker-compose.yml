@@ -22,7 +22,7 @@ services:
       - PGDATABASE=postgres
       - PGPORT=5432
 
-  hasura/graphql-engine:
+  hasura:
     image: hasura/graphql-engine:v1.3.3
     ports:
       - "8080:8080"
