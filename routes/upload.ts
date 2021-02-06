@@ -10,14 +10,10 @@ import * as SqlQueries from "../db/queries";
 const router = express.Router();
 
 router.post("/listings", upload.single("file"), function (req, res) {
-  console.log(
-    "req.file",
-    path.resolve(__dirname + "/../assets/", req.file.originalname)
-  );
   SqlQueries.clearListingsTable();
   const fileRows: ListingsInterface[] = [];
   fs.createReadStream(
-    path.resolve(__dirname, "/assets/", req.file.originalname)
+    path.resolve(__dirname, "./../assets/", req.file.originalname)
   )
     .pipe(csv.parse({ headers: true }))
     .on("error", (error) => {
@@ -49,7 +45,7 @@ router.post("/listings", upload.single("file"), function (req, res) {
 router.post("/contacts", upload.single("file"), function (req, res) {
   console.log(
     "req.file",
-    path.resolve(__dirname + "/../assets/", req.file.originalname)
+    path.resolve(__dirname + "./../assets/", req.file.originalname)
   );
   SqlQueries.clearContactsTable();
   const fileRows: any[] = [];
