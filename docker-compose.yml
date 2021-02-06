@@ -7,15 +7,14 @@ services:
     ports:
       - "3000:3000"
     environment: 
-      - POSTGRES_URL=postgres://postgres:password@localhost:5432/postgres
       - PGUSER=postgres
-      - PGHOST=localhost
+      - PGHOST=postgres
       - PGPASSWORD=password
       - PGDATABASE=postgres
       - PGPORT=5432
 
   postgres:
-    image: postgres:latest
+    build: ./postgresDocker
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: postgres
