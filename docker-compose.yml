@@ -1,18 +1,5 @@
 version: "3"
 services:
-  app:
-    build: .
-    depends_on:
-      - postgres
-    ports:
-      - "3000:3000"
-    environment: 
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGPASSWORD=password
-      - PGDATABASE=postgres
-      - PGPORT=5432
-
   postgres:
     build: ./postgresDocker
     environment:
@@ -21,3 +8,30 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGPASSWORD=password
+      - PGDATABASE=postgres
+      - PGPORT=5432
+
+  hasura/graphql-engine:
+    image: hasura/graphql-engine:v1.3.3
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "postgres"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+
