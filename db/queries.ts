@@ -64,7 +64,10 @@ const averagePriceOfTheMostContactedListingsReport = async () => {
   return res.rows;
 };
 
-const theTopMostContactedListingsPerMonthReport = () => {};
+const theTopMostContactedListingsPerMonthReport =async () => {
+  const res = await pool.query("WITH temp AS (SELECT listing_id, extract( month from to_timestamp(contact_date) ) as month from contacts order by listing_id ) Select rank, id, make,month, total_contact, price, mileage, seller_type from ( select *, rank() over( partition by month order by total_contact desc, listing_id desc ) as rank from ( select *, count(*) as total_contact from temp group by 1,2 order by 2, 3 desc ) as temp2 ) as temp3 join listings on listing_id = id where rank <= 5;");
+  return res.rows;
+};
 
 export {
   clearListingsTable,
