@@ -24,7 +24,7 @@ Support Needed Reports From Provided CSV files
 * Express App
 * PostgreSQL Database
 
-### Upload CSV From Postman in ```form-data``` Requet Body Format
+### Upload CSV From Postman in ```form-data``` Requet Body Format key must be equal ```file```
 ![alt text](https://github.com/AmrAyoub97/AS24-backend-challenge/blob/master/blob/Capture.PNG?raw=true)  
 ### API Description
 | Action | Endpoint URL | Verb |
