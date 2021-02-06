@@ -29,8 +29,8 @@ Support Needed Reports From Provided CSV files
 ### API Description
 | Action | Endpoint URL | Verb |
 | ------ | ------------ | ---- | 
-| Upload Listing CSV|/applications |POST|
-| Upload Contacts CSV|/applications|POST|
+| Upload Listing CSV|/upload/listings |POST|
+| Upload Contacts CSV|/upload/contacts|POST|
 | Report Average Listing Selling Price per Seller Type| /reports/average-listing-selling-price-per-seller-type |GET|
 | Report Percentual distribution of available cars by Make| /reports/percentual-distribution-of-available-cars-by-make |GET|
 | Report Average price of the 30% most contacted listings| /reports/average-price-of-the-30%-most-contacted-listings |GET|
