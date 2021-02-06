@@ -3,15 +3,33 @@ import fs from "fs";
 import * as csv from "fast-csv";
 import upload from "../middleware/upload";
 import * as path from "path";
-import ListingsInterface from "../interfaces/listings";
-import ContactsInterface from "../interfaces/contacts";
 import * as SqlQueries from "../db/queries";
 
 const router = express.Router();
+type fileType = "listings" | "contacts";
 
 router.post("/listings", upload.single("file"), function (req, res) {
-  SqlQueries.clearListingsTable();
-  const fileRows: ListingsInterface[] = [];
+  try {
+    SqlQueries.clearListingsTable();
+    readUploadedFile(req, "listings");
+    return res.json({ message: "Valid Listing csv Successfully Uploaded" });
+  } catch (error) {
+    return res.json({ message: error.message }).status(500);
+  }
+});
+
+router.post("/contacts", upload.single("file"), function (req, res) {
+  try {
+    SqlQueries.clearContactsTable();
+    readUploadedFile(req, "contacts");
+    return res.json({ message: "Valid Listing csv Successfully Uploaded" });
+  } catch (error) {
+    return res.json({ message: error.message }).status(500);
+  }
+});
+
+function readUploadedFile(req: any, type: fileType) {
+  let fileRows: any[] = [];
   fs.createReadStream(
     path.resolve(__dirname, "./../assets/", req.file.originalname)
   )
@@ -23,67 +41,34 @@ router.post("/listings", upload.single("file"), function (req, res) {
       fileRows.push(data); // push each row
     })
     .on("end", function () {
-      const data = fileRows.map(function (obj: any) {
-        return Object.keys(obj)
-          .map(function (key: any) {
-            return obj[key];
-          });
+      fileRows = fileRows.map(function (obj: any) {
+        return Object.keys(obj).map(function (key: any) {
+          return obj[key];
+        });
       });
-      SqlQueries.insertListings(data);
-      fs.unlinkSync(req.file.path); // remove temp file
-      //process "fileRows" and respond
+      //validate csv
+      const validationError = validateCsvData(fileRows, type);
+      if (validationError) {
+        throw validationError;
+      }
+      // save csv file to postgres realted tables
+      switch (type) {
+        case "listings":
+          SqlQueries.insertListings(fileRows);
+          break;
+        case "contacts":
+          SqlQueries.insertContacts(fileRows);
+          break;
+        default:
+          break;
+      }
+      fs.unlinkSync(req.file.path); // remove temp cvs file
     });
+}
 
-  const validationError = validateCsvData(fileRows);
-  if (validationError) {
-    return res.status(403).json({ error: validationError });
-  }
-  //else process "fileRows" and respond
-  return res.json({ message: "Valid Listing csv Successfully Uploaded" });
-});
-
-router.post("/contacts", upload.single("file"), function (req, res) {
-  console.log(
-    "req.file",
-    path.resolve(__dirname + "./../assets/", req.file.originalname)
-  );
-  SqlQueries.clearContactsTable();
-  const fileRows: any[] = [];
-  fs.createReadStream(
-    path.resolve(__dirname, "/assets/", req.file.originalname)
-  )
-    .pipe(csv.parse({ headers: true }))
-    .on("error", (error) => {
-      console.log(fileRows);
-      throw error.message;
-    })
-    .on("data", function (data) {
-      fileRows.push(data); // push each row
-    })
-    .on("end", function () {
-      const data = fileRows.map(function (obj) {
-        return Object.keys(obj)
-          .map(function (key) {
-            return obj[key];
-          });
-      });
-      SqlQueries.insertContacts(data);
-      fs.unlinkSync(req.file.path); // remove temp file
-      //process "fileRows" and respond
-    });
-
-  const validationError = validateCsvData(fileRows);
-  if (validationError) {
-    return res.status(403).json({ error: validationError });
-  }
-  //else process "fileRows" and respond
-  return res.json({ message: "Valid Contacts csv Successfully Uploaded" });
-});
-
-function validateCsvData(rows: any) {
-  const dataRows = rows.slice(1, rows.length); //ignore header at 0 and get rest of the rows
-  for (let i = 0; i < dataRows.length; i++) {
-    const rowError = validateCsvRow(dataRows[i]);
+function validateCsvData(rows: any, type: fileType) {
+  for (let i = 0; i < rows.length; i++) {
+    const rowError = validateCsvRow(rows[i], type);
     if (rowError) {
       return `${rowError} on row ${i + 1}`;
     }
@@ -91,12 +76,17 @@ function validateCsvData(rows: any) {
   return;
 }
 
-function validateCsvRow(row: any): any {
-  // if (!row[0]) {
-  //   return "invalid name";
-  // } else if (!Number.isInteger(Number(row[1]))) {
-  //   return "invalid roll number";
-  // }
+function validateCsvRow(row: string[], type: fileType): any {
+  switch (type) {
+    case "listings":
+      if (row.length != 5) return "invalid lisitings fields"; // 5 is the number of listing table columns
+      break;
+    case "contacts":
+      if (row.length != 2) return "invalid contacts fields"; // 2 is the number of contacts table columns
+      break;
+    default:
+      break;
+  }
   return null;
 }
 module.exports = router;
