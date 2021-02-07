@@ -13,9 +13,7 @@ router.post("/listings", upload.single("file"), function (req, res) {
     SqlQueries.clearListingsTable();
     readUploadedFile(req, "listings")
       .then(() => {
-        return res
-          .json({ message: "Valid Listing CSV Successfully Uploaded" })
-          .sendStatus(202);
+        return res.sendStatus(202);
       })
       .catch(() => {
         return res.sendStatus(406);
@@ -30,9 +28,7 @@ router.post("/contacts", upload.single("file"), async function (req, res) {
     SqlQueries.clearListingsTable();
     readUploadedFile(req, "contacts")
       .then(() => {
-        return res
-          .json({ message: "Valid Contacts CSV Successfully Uploaded" })
-          .sendStatus(202);
+        return res.sendStatus(202);
       })
       .catch(() => {
         return res.sendStatus(406);
@@ -66,10 +62,10 @@ function readUploadedFile(req: any, type: fileType) {
         // save csv file to postgres realted tables
         switch (type) {
           case "listings":
-            //SqlQueries.insertListings(fileRows);
+            SqlQueries.insertListings(fileRows);
             break;
           case "contacts":
-            //SqlQueries.insertContacts(fileRows);
+            SqlQueries.insertContacts(fileRows);
             break;
           default:
             break;
