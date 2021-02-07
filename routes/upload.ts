@@ -60,15 +60,19 @@ function readUploadedFile(req: any, type: fileType) {
           reject(validationError);
         }
         // save csv file to postgres realted tables
-        switch (type) {
-          case "listings":
-            SqlQueries.insertListings(fileRows);
-            break;
-          case "contacts":
-            SqlQueries.insertContacts(fileRows);
-            break;
-          default:
-            break;
+        try {
+          switch (type) {
+            case "listings":
+              SqlQueries.insertListings(fileRows);
+              break;
+            case "contacts":
+              SqlQueries.insertContacts(fileRows);
+              break;
+            default:
+              break;
+          }
+        } catch (error) {
+          reject(error);
         }
         fs.unlinkSync(req.file.path); // remove temp cvs file
         resolve(true);

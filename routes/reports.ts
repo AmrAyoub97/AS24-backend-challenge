@@ -11,19 +11,19 @@ router.get("/average-listing-selling-price-per-seller-type", async (_, res) => {
 router.get(
   "/percentual-distribution-of-available-cars-by-make",
   async (_, res) => {
-    const results = SqlQueries.percentualDistributionOfAvailableCarsByMakeReport();
+    const results = await SqlQueries.percentualDistributionOfAvailableCarsByMakeReport();
     return res.json(results);
   }
 );
 router.get(
   "/average-price-of-the-30%-most-contacted-listings",
   async (_, res) => {
-    const results = SqlQueries.averagePriceOfTheMostContactedListingsReport();
+    const results = await SqlQueries.averagePriceOfTheMostContactedListingsReport();
     return res.json(results);
   }
 );
-router.get("/the-top-5-most-contacted-listings-per-month", (_, res) => {
-  const results = SqlQueries.theTopMostContactedListingsPerMonthReport();
+router.get("/the-top-5-most-contacted-listings-per-month", async (_, res) => {
+  const results = await SqlQueries.theTopMostContactedListingsPerMonthReport();
   return res.json(results);
 });
 module.exports = router;

@@ -16,6 +16,5 @@ CREATE TABLE listings(
 CREATE TABLE contacts(
     listing_id INT NOT NULL,
     contact_date bigint NOT NULL,
-    CONSTRAINT fk_listings FOREIGN KEY(listing_id) REFERENCES listings(id)
+    UNIQUE (listing_id, contact_date)
 );
-
