@@ -11,59 +11,73 @@ type fileType = "listings" | "contacts";
 router.post("/listings", upload.single("file"), function (req, res) {
   try {
     SqlQueries.clearListingsTable();
-    readUploadedFile(req, "listings");
-    return res.json({ message: "Valid Listing csv Successfully Uploaded" });
+    readUploadedFile(req, "listings")
+      .then(() => {
+        return res
+          .json({ message: "Valid Listing CSV Successfully Uploaded" })
+          .sendStatus(202);
+      })
+      .catch(() => {
+        return res.sendStatus(406);
+      });
   } catch (error) {
-    return res.json({ message: error.message }).status(500);
+    return res.status(500).send({ message: error.message });
   }
 });
 
-router.post("/contacts", upload.single("file"), function (req, res) {
+router.post("/contacts", upload.single("file"), async function (req, res) {
   try {
-    SqlQueries.clearContactsTable();
-    readUploadedFile(req, "contacts");
-    return res.json({ message: "Valid Listing csv Successfully Uploaded" });
+    SqlQueries.clearListingsTable();
+    readUploadedFile(req, "contacts")
+      .then(() => {
+        return res
+          .json({ message: "Valid Contacts CSV Successfully Uploaded" })
+          .sendStatus(202);
+      })
+      .catch(() => {
+        return res.sendStatus(406);
+      });
   } catch (error) {
-    return res.json({ message: error.message }).status(500);
+    return res.status(500).send({ message: error.message });
   }
 });
 
 function readUploadedFile(req: any, type: fileType) {
-  let fileRows: any[] = [];
-  fs.createReadStream(
-    path.resolve(__dirname, "./../assets/", req.file.originalname)
-  )
-    .pipe(csv.parse({ headers: true }))
-    .on("error", (error) => {
-      throw error.message;
-    })
-    .on("data", function (data) {
-      fileRows.push(data); // push each row
-    })
-    .on("end", function () {
-      fileRows = fileRows.map(function (obj: any) {
-        return Object.keys(obj).map(function (key: any) {
-          return obj[key];
+  return new Promise((resolve, reject) => {
+    let fileRows: any[] = [];
+    fs.createReadStream(
+      path.resolve(__dirname, "./../assets/", req.file.originalname)
+    )
+      .pipe(csv.parse({ headers: true }))
+      .on("data", function (data) {
+        fileRows.push(data); // push each row
+      })
+      .on("end", function () {
+        fileRows = fileRows.map(function (obj: any) {
+          return Object.keys(obj).map(function (key: any) {
+            return obj[key];
+          });
         });
+        //validate csv
+        const validationError = validateCsvData(fileRows, type);
+        if (validationError) {
+          reject(validationError);
+        }
+        // save csv file to postgres realted tables
+        switch (type) {
+          case "listings":
+            //SqlQueries.insertListings(fileRows);
+            break;
+          case "contacts":
+            //SqlQueries.insertContacts(fileRows);
+            break;
+          default:
+            break;
+        }
+        fs.unlinkSync(req.file.path); // remove temp cvs file
+        resolve(true);
       });
-      //validate csv
-      const validationError = validateCsvData(fileRows, type);
-      if (validationError) {
-        throw validationError;
-      }
-      // save csv file to postgres realted tables
-      switch (type) {
-        case "listings":
-          SqlQueries.insertListings(fileRows);
-          break;
-        case "contacts":
-          SqlQueries.insertContacts(fileRows);
-          break;
-        default:
-          break;
-      }
-      fs.unlinkSync(req.file.path); // remove temp cvs file
-    });
+  });
 }
 
 function validateCsvData(rows: any, type: fileType) {
